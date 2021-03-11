@@ -1,0 +1,188 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+GET           /status                                               api.v1.controllers.MainController.status
+GET           /v1/:orga/test                                        api.v1.controllers.MainController.testOrder(request: Request, orga)
+POST          /v1/:orga/payments/test                               api.v1.controllers.MainController.testPaymentFile(request: Request, orga)
+GET           /v1/:orga/sage1000/list                               api.v1.controllers.MainController.getFiles(orga)
+GET           /v1/:orga/sage1000/rename                             api.v1.controllers.MainController.renameFile(request: Request, orga)
+POST          /v1/:orga/sage1000/transfer                           api.v1.controllers.MainController.transfer(request: Request, orga)
+GET           /v1/:orga/sage1000/get                                api.v1.controllers.MainController.getFile(request: Request, orga)
+GET           /v1/:orga/sage1000/trigger                            api.v1.controllers.MainController.sage1000Trigger(orga)
+GET           /v1/:orga/ldap/trigger                                api.v1.controllers.MainController.ldapTrigger(orga)
+GET           /v1/:orga/adnparameters/:adnName                      api.v1.controllers.EntitiesController.getAdnParameters(request: Request, orga, adnName)
+
+# Market
+GET           /v1/:orga/getsinglemarket                             api.v1.controllers.MarketsController.getSingleMarket(orga)
+GET           /v1/:orga/markets                                     api.v1.controllers.MarketsController.get(request: Request, orga)
+GET           /v1/:orga/markets/:uuid                               api.v1.controllers.MarketsController.getMarket(orga, uuid)
+GET           /v1/:orga/markets/:uuid/bpu/:bpuUuid                  api.v1.controllers.MarketsController.getBpuFile(orga, uuid, bpuUuid)
+POST          /v1/:orga/markets/:uuid/bpu                           api.v1.controllers.MarketsController.addBpuFile(request: Request, orga, uuid)
+DELETE        /v1/:orga/markets/bpu/:uuid                           api.v1.controllers.MarketsController.removeBpuFile(orga, uuid)
+GET           /v1/:orga/markets/:uuid/references                    api.v1.controllers.MarketsController.getReferences(request: Request, orga, uuid)
+POST          /v1/:orga/markets                                     api.v1.controllers.MarketsController.add(request: Request, orga)
+POST          /v1/:orga/markets/contact/:uuid                       api.v1.controllers.MarketsController.addContact(request: Request, orga, uuid)
+GET           /v1/:orga/markets/contact/:uuid                       api.v1.controllers.MarketsController.getContact(orga, uuid)
+PATCH         /v1/:orga/markets/:uuid/people/:peopleUuid            api.v1.controllers.MarketsController.updateContact(request: Request, orga, uuid, peopleUuid)
+DELETE        /v1/:orga/markets/:uuid/people/:peopleUuid            api.v1.controllers.MarketsController.deleteContact(request: Request, orga, uuid, peopleUuid)
+GET           /v1/:orga/markets/account/:uuid                       api.v1.controllers.MarketsController.getAccount(orga, uuid)
+POST          /v1/:orga/markets/account/:uuid                       api.v1.controllers.MarketsController.addAccount(request: Request, orga, uuid)
+PATCH         /v1/:orga/markets/:uuid/account/:accountUuid          api.v1.controllers.MarketsController.updateAccount(request: Request, orga, uuid, accountUuid)
+DELETE        /v1/:orga/markets/:uuid/account/:peopleUuid           api.v1.controllers.MarketsController.deleteAccount(request: Request, orga, uuid, peopleUuid)
+GET           /v1/:orga/markets/:uuid/user                          api.v1.controllers.MarketsController.getUser(orga, uuid)
+POST          /v1/:orga/markets/:uuid/user                          api.v1.controllers.MarketsController.addUser(request: Request, orga, uuid)
+PATCH         /v1/:orga/markets/:uuid/user/:userLogin               api.v1.controllers.MarketsController.updateUser(request: Request, orga, uuid, userLogin)
+DELETE        /v1/:orga/markets/:uuid/user/:userLogin               api.v1.controllers.MarketsController.deleteUser(orga, uuid, userLogin)
+PATCH         /v1/:orga/markets/:uuid                               api.v1.controllers.MarketsController.updateMarket(request: Request, orga, uuid)
+GET           /v1/:orga/markets/:uuid/comments                      api.v1.controllers.MarketsController.getComments(orga, uuid)
+POST          /v1/:orga/markets/comment                             api.v1.controllers.MarketsController.addComment(orga, request: Request)
+
+# Orders
+GET           /v1/:orga/orders                                      api.v1.controllers.OrdersController.get(request: Request, orga)
+GET           /v1/:orga/orders/overviews                            api.v1.controllers.OrdersController.getOverviews(request: Request, orga)
+GET           /v1/:orga/orders/:uuid                                api.v1.controllers.OrdersController.getOrder(orga, uuid)
+GET           /v1/:orga/orders/:uuid/recap                          api.v1.controllers.OrdersController.orderRecap(orga, uuid)
+GET           /v1/:orga/orders/:uuid/referencefiles                 api.v1.controllers.OrdersController.getReferenceFile(request: Request, orga, uuid)
+POST          /v1/:orga/orders                                      api.v1.controllers.OrdersController.add(request: Request, orga)
+PATCH         /v1/:orga/orders/:uuid                                api.v1.controllers.OrdersController.modify(request: Request, orga, uuid)
+DELETE        /v1/:orga/orders/:uuid                                api.v1.controllers.OrdersController.delete(orga, uuid)
+PATCH         /v1/:orga/orders/:uuid/orderlines                     api.v1.controllers.OrdersController.setOrderLines(request: Request, orga, uuid)
+PATCH         /v1/:orga/orders/:uuid/orderlines/batch               api.v1.controllers.OrdersController.setOrderLinesInBatch(request: Request, orga, uuid)
+PATCH         /v1/:orga/orders/:uuid/status                         api.v1.controllers.OrdersController.setStatus(request: Request, orga, uuid)
+GET           /v1/:orga/orders/:uuid/comments                       api.v1.controllers.OrdersController.getComments(orga,uuid)
+POST          /v1/:orga/orders/comment                              api.v1.controllers.OrdersController.addComment(request: Request, orga)
+POST          /v1/:orga/repdest                                     api.v1.controllers.OrdersController.addReportDestination(request: Request, orga)
+PATCH         /v1/:orga/repdest                                     api.v1.controllers.OrdersController.updateReportDestination(request: Request, orga)
+DELETE        /v1/:orga/repdest/:uuid                               api.v1.controllers.OrdersController.deleteReportDestination(orga, uuid)
+
+# Estimates
+GET           /v1/:orga/estimates                                   api.v1.controllers.EstimatesController.get(request: Request, orga)
+GET           /v1/:orga/estimates/:uuid                             api.v1.controllers.EstimatesController.getEstimate(orga, uuid)
+PATCH         /v1/:orga/estimates/:uuid                             api.v1.controllers.EstimatesController.modify(request: Request, orga, uuid)
+DELETE        /v1/:orga/estimates/:uuid                             api.v1.controllers.EstimatesController.delete(orga, uuid)
+
+# Bills
+GET           /v1/:orga/bills                                       api.v1.controllers.BillsController.get(request: Request, orga)
+GET           /v1/:orga/billswithdetails                            api.v1.controllers.BillsController.getDetailedBills(request: Request, orga)
+GET           /v1/:orga/bills/overviews                             api.v1.controllers.BillsController.getOverviews(request: Request, orga)
+GET           /v1/:orga/bills/pdf/:uuid                             api.v1.controllers.BillsController.getPdfBill(orga, uuid)
+# POST          /v1/:orga/bills/export                                api.v1.controllers.BillsController.generateExport(request: Request, orga)
+POST          /v1/:orga/bills                                       api.v1.controllers.BillsController.add(request: Request, orga)
+PATCH         /v1/:orga/bills                                       api.v1.controllers.BillsController.patch(request: Request, orga)
+GET           /v1/:orga/bills/:uuid                                 api.v1.controllers.BillsController.getFacture(orga, uuid)
+PATCH         /v1/:orga/bills/:uuid                                 api.v1.controllers.BillsController.validate(request: Request, orga, uuid)
+POST          /v1/:orga/bills/:uuid/payments                        api.v1.controllers.BillsController.addPayment(request: Request, orga, uuid)
+DELETE        /v1/:orga/bills/:uuid                                 api.v1.controllers.BillsController.delete(orga, uuid)
+GET           /v1/:orga/creditnotes                                 api.v1.controllers.BillsController.creditNotes(request: Request, orga)
+POST          /v1/:orga/bills/:uuid/creditnotes                     api.v1.controllers.BillsController.addCreditNote(request: Request, orga, uuid)
+GET           /v1/:orga/management/bills                            api.v1.controllers.BillsController.exportBillForVariables(request: Request, orga)
+GET           /v1/:orga/management/payments                         api.v1.controllers.BillsController.exportPaymentForVariables(request: Request, orga)
+GET           /v1/:orga/management/recovery                         api.v1.controllers.BillsController.exportRecoveryForVariables(request: Request, orga)
+GET           /v1/:orga/management/inprogress                       api.v1.controllers.BillsController.exportInProgressForVariables(request: Request, orga)
+GET           /v1/:orga/bills/:uuid/comments                        api.v1.controllers.BillsController.getComments(orga, uuid)
+POST          /v1/:orga/bills/comment                               api.v1.controllers.BillsController.addComment(orga, request: Request)
+
+# Accounts
+GET           /v1/:orga/accounts                                    api.v1.controllers.AccountsController.get(request: Request, orga)
+GET           /v1/:orga/accounts/individuals                        api.v1.controllers.AccountsController.getIndividuals(request: Request, orga)
+GET           /v1/:orga/accounts/professionals                      api.v1.controllers.AccountsController.getProfessionals(request: Request, orga)
+GET           /v1/:orga/accounts/individuals/overviews              api.v1.controllers.AccountsController.getIndividualOverviews(request: Request, orga)
+GET           /v1/:orga/accounts/professionals/overviews            api.v1.controllers.AccountsController.getProfessionalOverviews(request: Request, orga)
+GET           /v1/:orga/accounts/overviews                          api.v1.controllers.AccountsController.getAccountOverviews(request: Request, orga)
+GET           /v1/:orga/accounts/:uuid                              api.v1.controllers.AccountsController.getAccount(orga, uuid)
+POST          /v1/:orga/accounts                                    api.v1.controllers.AccountsController.add(request: Request, orga)
+PATCH         /v1/:orga/accounts/:uuid                              api.v1.controllers.AccountsController.update(request: Request, orga, uuid)
+DELETE        /v1/:orga/accounts/:uuid                              api.v1.controllers.AccountsController.delete(orga, uuid)
+GET           /v1/:orga/accounts/:uuid/comments                     api.v1.controllers.AccountsController.getComments(orga, uuid)
+POST          /v1/:orga/accounts/comment                            api.v1.controllers.AccountsController.addComment(orga, request: Request)
+
+# Entities
+GET           /v1/:orga/entities                                    api.v1.controllers.EntitiesController.get(request: Request, orga)
+GET           /v1/:orga/entities/:entityId                          api.v1.controllers.EntitiesController.getEntity(orga, entityId)
+POST          /v1/:orga/entities                                    api.v1.controllers.EntitiesController.add(request: Request, orga)
+PATCH         /v1/:orga/entities/:uuid                              api.v1.controllers.EntitiesController.update(request: Request, orga, uuid)
+DELETE        /v1/:orga/entities/:uuid                              api.v1.controllers.EntitiesController.delete(orga, uuid)
+
+# Addresses
+GET           /v1/:orga/addresses                                   api.v1.controllers.AddressesController.get(request: Request, orga)
+GET           /v1/:orga/addresses/:addressId                        api.v1.controllers.AddressesController.getAddress(orga, addressId)
+POST          /v1/:orga/addresses                                   api.v1.controllers.AddressesController.add(request: Request, orga)
+PATCH         /v1/:orga/addresses/:uuid                             api.v1.controllers.AddressesController.update(request: Request, orga, uuid)
+DELETE        /v1/:orga/addresses/:uuid                             api.v1.controllers.AddressesController.delete(orga, uuid)
+
+# Establishments
+GET           /v1/:orga/establishments                              api.v1.controllers.EstablishmentsController.get(request: Request, orga)
+GET           /v1/:orga/establishments/overviews                    api.v1.controllers.EstablishmentsController.getOverviews(request: Request, orga)
+GET           /v1/:orga/establishments/:uuid                        api.v1.controllers.EstablishmentsController.getEstablishment(orga, uuid)
+GET           /v1/:orga/establishments/full/:uuid                   api.v1.controllers.EstablishmentsController.getFullEstablishment(orga, uuid)
+POST          /v1/:orga/establishments                              api.v1.controllers.EstablishmentsController.add(request: Request, orga)
+PATCH         /v1/:orga/establishments/:uuid                        api.v1.controllers.EstablishmentsController.update(request: Request, orga, uuid)
+DELETE        /v1/:orga/establishments/:uuid                        api.v1.controllers.EstablishmentsController.delete(orga, uuid)
+GET           /v1/:orga/establishments/:uuid/delegates              api.v1.controllers.EstablishmentsController.getEstablishmentDelegates(request: Request, orga, uuid)
+GET           /v1/:orga/establishments/:uuid/people                 api.v1.controllers.EstablishmentsController.getEstablishmentPeople(request: Request, orga, uuid)
+GET           /v1/:orga/establishments/:uuid/addresses              api.v1.controllers.EstablishmentsController.getEstablishmentAddresses(request: Request, orga, uuid)
+POST          /v1/:orga/establishments/:uuid/delegates/:fkId        api.v1.controllers.EstablishmentsController.addEstablishmentDelegate(request: Request, orga, uuid, fkId)
+POST          /v1/:orga/establishments/:uuid/people/:fkId           api.v1.controllers.EstablishmentsController.addEstablishmentPeople(request: Request, orga, uuid, fkId)
+POST          /v1/:orga/establishments/:uuid/addresses/:fkId        api.v1.controllers.EstablishmentsController.addEstablishmentAddress(request: Request, orga, uuid, fkId)
+DELETE        /v1/:orga/establishments/:uuid/delegates/:fkId        api.v1.controllers.EstablishmentsController.removeEstablishmentDelegate(request: Request, orga, uuid, fkId)
+DELETE        /v1/:orga/establishments/:uuid/people/:fkId           api.v1.controllers.EstablishmentsController.removeEstablishmentPeople(request: Request, orga, uuid, fkId)
+DELETE        /v1/:orga/establishments/:uuid/addresses/:fkId        api.v1.controllers.EstablishmentsController.removeEstablishmentAddress(request: Request, orga, uuid, fkId)
+GET           /v1/:orga/establishments/:uuid/comments               api.v1.controllers.EstablishmentsController.getComments(orga, uuid)
+POST          /v1/:orga/establishments/comment                      api.v1.controllers.EstablishmentsController.addComment(orga, request: Request)
+
+# People
+GET           /v1/:orga/people                                      api.v1.controllers.PeopleController.get(request: Request, orga)
+GET           /v1/:orga/people/:uuid                                api.v1.controllers.PeopleController.getPeople(orga, uuid)
+GET           /v1/:orga/people/purchasers/:uuid                     api.v1.controllers.PeopleController.getPurchasers(request: Request, orga, uuid)
+POST          /v1/:orga/people                                      api.v1.controllers.PeopleController.add(request: Request, orga)
+PATCH         /v1/:orga/people/:uuid                                api.v1.controllers.PeopleController.update(request: Request, orga, uuid)
+GET           /v1/:orga/people/:uuid/addresses                      api.v1.controllers.PeopleController.getPeopleAddresses(request: Request, orga, uuid)
+POST          /v1/:orga/people/:uuid/addresses/:fkId                api.v1.controllers.PeopleController.addPeopleAddress(request: Request, orga, uuid, fkId)
+DELETE        /v1/:orga/people/:uuid/addresses/:fkId                api.v1.controllers.PeopleController.removePeopleAddress(request: Request, orga, uuid, fkId)
+
+# Activities
+GET           /v1/:orga/activities                                  api.v1.controllers.ActivitiesController.get(request: Request, orga)
+GET           /v1/:orga/activities/:activityId                      api.v1.controllers.ActivitiesController.getActivity(orga, activityId)
+POST          /v1/:orga/activities                                  api.v1.controllers.ActivitiesController.add(request: Request, orga)
+PATCH         /v1/:orga/activities/:uuid                            api.v1.controllers.ActivitiesController.update(request: Request, orga, uuid)
+DELETE        /v1/:orga/activities/:uuid                            api.v1.controllers.ActivitiesController.delete(orga, uuid)
+
+# Groups
+GET           /v1/:orga/groups                                      api.v1.controllers.GroupsController.get(request: Request, orga)
+GET           /v1/:orga/groups/:groupId                             api.v1.controllers.GroupsController.getGroup(orga, groupId)
+POST          /v1/:orga/groups                                      api.v1.controllers.GroupsController.add(request: Request, orga)
+PATCH         /v1/:orga/groups/:uuid                                api.v1.controllers.GroupsController.update(request: Request, orga, uuid)
+DELETE        /v1/:orga/groups/:uuid                                api.v1.controllers.GroupsController.delete(orga, uuid)
+
+# Agencies
+GET           /v1/:orga/agencies                                    api.v1.controllers.AgenciesController.get(request: Request, orga)
+GET           /v1/:orga/agencies/:agencyId                          api.v1.controllers.AgenciesController.getAgency(orga, agencyId)
+POST          /v1/:orga/agencies                                    api.v1.controllers.AgenciesController.add(request: Request, orga)
+PATCH         /v1/:orga/agencies/:uuid                              api.v1.controllers.AgenciesController.update(request: Request, orga, uuid)
+DELETE        /v1/:orga/agencies/:uuid                              api.v1.controllers.AgenciesController.delete(orga, uuid)
+
+# Search
+GET           /v1/:orga/crm/search/reindex/:indexName               api.v1.controllers.OrdersController.forceReindex(orga, indexName)
+POST          /v1/:orga/crm/search/:indexName                       api.v1.controllers.OrdersController.search(request: Request, orga, indexName)
+
+# Users
+GET           /v1/:orga/userswithgroups                             api.v1.controllers.UsersController.getUserWithGroups(orga)
+GET           /v1/:orga/users/:uuid                                 api.v1.controllers.UsersController.getUser(orga, uuid)
+GET           /v1/:orga/users/search-users/:value                   api.v1.controllers.UsersController.search(orga, value)
+
+# Attachments
+GET           /v1/:orga/attachments                                 api.v1.controllers.AttachmentsController.get(request: Request, orga)
+GET           /v1/:orga/attachments/entity/:uuid                    api.v1.controllers.AttachmentsController.getAttachmentsByEntityId(orga, uuid)
+GET           /v1/:orga/attachments/history/:uuid                   api.v1.controllers.AttachmentsController.getAttachmentHistory(orga, uuid)
+GET           /v1/:orga/attachments/file/:uuid                      api.v1.controllers.AttachmentsController.getAttachmentFile(request: Request, orga, uuid)
+GET           /v1/:orga/attachments/:uuid                           api.v1.controllers.AttachmentsController.getAttachment(orga, uuid)
+POST          /v1/:orga/attachments/:uuid                           api.v1.controllers.AttachmentsController.add(request: Request, orga, uuid)
+
+GET           /v1/:orga/office                                      api.v1.controllers.OfficeController.get(request: Request, orga)
+GET           /v1/:orga/office/:uuid                                api.v1.controllers.OfficeController.getOffice(orga, uuid)
+GET           /v1/:orga/office/agency/:uuid                         api.v1.controllers.OfficeController.getOfficiesByAgencyId(orga, uuid)
+GET           /v1/:orga/office/search/:value                        api.v1.controllers.OfficeController.search(orga, value)
+PATCH         /v1/:orga/office                                      api.v1.controllers.OfficeController.update(request: Request, orga)
+
+# Map static resources from the /public folder to the /assets URL path
+GET           /assets/*file                                         controllers.Assets.versioned(path="/public", file: Asset)

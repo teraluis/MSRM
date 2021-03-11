@@ -1,0 +1,12 @@
+[submodule "app/core"]
+	path = app/core
+	url = ../../adx/core.git
+	branch = master
+[submodule "app/estateclient"]
+	path = app/estateclient
+	url = ../../adx/estateclient.git
+    branch = master
+[submodule "app/missionclient"]
+	path = app/missionclient
+	url = ../../adx/missionclient.git
+	branch = master

@@ -1,0 +1,184 @@
+services:
+  - docker:18.09-dind
+
+image: docker:dind
+
+variables:
+  DOCKER_DRIVER: overlay2
+  KUBECTL_DL: https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - build-artifact
+  - build-docker
+  - deploy
+
+build-artifact:
+  stage: build-artifact
+  image: java:8-jdk-alpine
+  script:
+    - apk add --update sbt --repository http://dl-3.alpinelinux.org/alpine/edge/testing/
+    - sbt dist
+  artifacts:
+    paths:
+      - target/universal/crm.zip
+  only:
+    - develop
+    - master
+    - tags
+    - release-int
+    - release-staging
+
+build-docker-image:
+  stage: build-docker
+  script:
+    - docker info
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build . -t $CI_REGISTRY/adx/crm:$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - docker push $CI_REGISTRY/adx/crm:$(echo $CI_COMMIT_SHA | cut -c1-7)
+  dependencies:
+    - build-artifact
+  only:
+    - master
+    - release-int
+    - release-staging
+
+build-docker-image-prod:
+  stage: build-docker
+  image: docker:latest
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build . -t $CI_REGISTRY/adx/crm:$CI_COMMIT_TAG
+    - docker push $CI_REGISTRY/adx/crm:$CI_COMMIT_TAG
+  dependencies:
+    - build-artifact
+  only:
+    - tags
+
+deploy-int:
+ stage: deploy
+ image: docker:latest
+ script:
+   - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+   - apk add --update curl
+   - curl -LO $KUBECTL_DL
+   - mkdir /kube
+   - echo "$KUBE_CONFIG_INT" > /kube/kubeconfig.conf
+   - chmod +x kubectl
+   - apk add gettext
+   - sed -i "s/POSTGRES_PWD/$POSTGRES_PASSWORD_INT/g" ./conf/application.int.conf
+   - sed -i "s/SECRET_KEY/$SECRET_KEY_INT/g" ./conf/application.int.conf
+   - export TPL_DOCKER_IMG_VERSION=$(echo $CI_COMMIT_SHA | cut -c1-7)
+   - sed -i "s/REGISTRY/$CI_REGISTRY/g" crm.tpl.yml
+   - sed -i "s/TPL_DOCKER_IMG_VERSION/$TPL_DOCKER_IMG_VERSION/g" crm.tpl.yml
+   - sed -i "s/CONF_FILE/application.int.conf/g" crm.tpl.yml
+   - sed -i "s/DATADOG_SERVICE/crm-int/g" crm.tpl.yml
+   - sed -i "s/DATADOG_AGENT_HOST/datadog-agent.datadog/g" crm.tpl.yml
+   - sed -i "s/DATADOG_PROFILING_ENABLE/false/g" crm.tpl.yml
+   - sed -i "s/LOG_MODE/json/g" crm.tpl.yml
+   - chmod +x deploy-int.sh && ./deploy-int.sh
+   - ./kubectl delete --kubeconfig /kube/kubeconfig.conf -n int configmap crm-api-config || echo "config already deleted"
+   - ./kubectl create --kubeconfig /kube/kubeconfig.conf -n int configmap crm-api-config --from-file=./conf/application.int.conf
+   - ./kubectl apply --kubeconfig /kube/kubeconfig.conf -n int -f crm.tpl.yml
+ only:
+   - release-int
+ tags:
+   - adg
+   - pp
+ dependencies:
+   - build-docker-image
+
+deploy-staging:
+ stage: deploy
+ image: docker:latest
+ script:
+   - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+   - apk add --update curl
+   - curl -LO $KUBECTL_DL
+   - mkdir /kube
+   - echo "$KUBE_CONFIG_INT" > /kube/kubeconfig.conf
+   - chmod +x kubectl
+   - apk add gettext
+   - sed -i "s/POSTGRES_PWD/$POSTGRES_PASSWORD_STAGING/g" ./conf/application.staging.conf
+   - sed -i "s/SECRET_KEY/$SECRET_KEY_STAGING/g" ./conf/application.staging.conf
+   - export TPL_DOCKER_IMG_VERSION=$(echo $CI_COMMIT_SHA | cut -c1-7)
+   - sed -i "s/REGISTRY/$CI_REGISTRY/g" crm.tpl.yml
+   - sed -i "s/TPL_DOCKER_IMG_VERSION/$TPL_DOCKER_IMG_VERSION/g" crm.tpl.yml
+   - sed -i "s/CONF_FILE/application.staging.conf/g" crm.tpl.yml
+   - sed -i "s/DATADOG_SERVICE/crm-staging/g" crm.tpl.yml
+   - sed -i "s/DATADOG_AGENT_HOST/datadog-agent.datadog/g" crm.tpl.yml
+   - sed -i "s/DATADOG_PROFILING_ENABLE/false/g" crm.tpl.yml
+   - sed -i "s/LOG_MODE/json/g" crm.tpl.yml
+   - chmod +x deploy-int.sh && ./deploy-int.sh
+   - ./kubectl delete --kubeconfig /kube/kubeconfig.conf -n staging configmap crm-api-config || echo "config already deleted"
+   - ./kubectl create --kubeconfig /kube/kubeconfig.conf -n staging configmap crm-api-config --from-file=./conf/application.staging.conf
+   - ./kubectl apply --kubeconfig /kube/kubeconfig.conf -n staging -f crm.tpl.yml
+ only:
+   - release-staging
+ tags:
+   - adg
+   - pp
+ dependencies:
+   - build-docker-image
+   
+deploy-preprod:
+  stage: deploy
+  image: docker:latest
+  script:
+    - apk add --update curl
+    - curl -LO $KUBECTL_DL
+    - mkdir /kube
+    - echo "$KUBE_CONFIG_PROD" > /kube/kubeconfig.conf
+    - chmod +x kubectl
+    - apk add gettext
+    - sed -i "s/POSTGRES_PWD/$POSTGRES_PASSWORD_PROD/g" ./conf/application.preprod.conf
+    - sed -i "s/SECRET_KEY/$SECRET_KEY_PROD/g" ./conf/application.preprod.conf
+    - export TPL_DOCKER_IMG_VERSION=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - sed -i "s/REGISTRY/$CI_REGISTRY/g" crm.tpl.yml
+    - sed -i "s/TPL_DOCKER_IMG_VERSION/$TPL_DOCKER_IMG_VERSION/g" crm.tpl.yml
+    - sed -i "s/CONF_FILE/application.preprod.conf/g" crm.tpl.yml
+    - sed -i "s/DATADOG_SERVICE/crm-preprod/g" crm.tpl.yml
+    - sed -i "s/DATADOG_AGENT_HOST/datadog-agent.datadog/g" crm.tpl.yml
+    - sed -i "s/DATADOG_PROFILING_ENABLE/false/g" crm.tpl.yml
+    - sed -i "s/LOG_MODE/json/g" crm.tpl.yml
+    - ./kubectl delete --kubeconfig /kube/kubeconfig.conf -n preprod configmap crm-api-config || echo "config already deleted"
+    - ./kubectl create --kubeconfig /kube/kubeconfig.conf -n preprod configmap crm-api-config --from-file=./conf/application.preprod.conf
+    - ./kubectl apply --kubeconfig /kube/kubeconfig.conf -n preprod -f crm.tpl.yml
+  only:
+    - master
+  tags:
+    - adg
+    - pp
+  dependencies:
+    - build-docker-image
+
+deploy-prod:
+  stage: deploy
+  image: docker:latest
+  script:
+    - apk add --update curl
+    - curl -LO $KUBECTL_DL
+    - mkdir /kube
+    - echo "$KUBE_CONFIG_PROD" > /kube/kubeconfig.conf
+    - chmod +x kubectl
+    - apk add gettext
+    - sed -i "s/POSTGRES_PWD/$POSTGRES_PASSWORD_PROD/g" ./conf/application.prod.conf
+    - sed -i "s/SECRET_KEY/$SECRET_KEY_PROD/g" ./conf/application.prod.conf
+    - export TPL_DOCKER_IMG_VERSION=$CI_COMMIT_TAG
+    - sed -i "s/REGISTRY/$CI_REGISTRY/g" crm.tpl.yml
+    - sed -i "s/TPL_DOCKER_IMG_VERSION/$TPL_DOCKER_IMG_VERSION/g" crm.tpl.yml
+    - sed -i "s/CONF_FILE/application.prod.conf/g" crm.tpl.yml
+    - sed -i "s/DATADOG_SERVICE/crm-prod/g" crm.tpl.yml
+    - sed -i "s/DATADOG_AGENT_HOST/datadog-agent.datadog/g" crm.tpl.yml
+    - sed -i "s/DATADOG_PROFILING_ENABLE/false/g" crm.tpl.yml
+    - sed -i "s/LOG_MODE/json/g" crm.tpl.yml
+    - ./kubectl delete --kubeconfig /kube/kubeconfig.conf -n prod configmap crm-api-config || echo "config already deleted"
+    - ./kubectl create --kubeconfig /kube/kubeconfig.conf -n prod configmap crm-api-config --from-file=./conf/application.prod.conf
+    - ./kubectl apply --kubeconfig /kube/kubeconfig.conf -n prod -f crm.tpl.yml
+  only:
+    - tags
+  tags:
+    - adg
+    - pp
+  dependencies:
+    - build-docker-image

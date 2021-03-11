@@ -1,0 +1,47 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: crm-api
+spec:
+  type: ClusterIP
+  selector:
+    app: api
+    project: crm
+  ports:
+  - protocol: TCP
+    name: web
+    port: 80
+    targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crm-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+      project: crm
+  template:
+    metadata:
+      labels:
+        app: api
+        project: crm
+    spec:
+      containers:
+      - name: crm-api
+        image: REGISTRY/adx/crm:TPL_DOCKER_IMG_VERSION
+        ports:
+        - containerPort: 3000
+          name: web
+        volumeMounts:
+        - name: config-volume
+          mountPath: /conf/
+        args: ["-Dhttp.port=3000", "-Dconfig.file=/conf/CONF_FILE", "-Dplay.evolutions.db.crm.autoApply=true", "-Dplay.evolutions.db.crm.autoApplyDowns=true", "-Ddd.agent.host=DATADOG_AGENT_HOST", "-Ddd.profiling.enabled=DATADOG_PROFILING_ENABLE", "-Ddd.service=DATADOG_SERVICE", "-Dlog.mode=LOG_MODE"]
+      volumes:
+      - name: config-volume
+        configMap:
+          name: crm-api-config
+      imagePullSecrets:
+      - name: fbk-regsecret
